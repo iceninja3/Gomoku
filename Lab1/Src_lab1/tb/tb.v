@@ -15,6 +15,11 @@ module tb;
    wire                 RsTx;                   // From uut_ of basys3.v
    wire [7:0]           led;                    // From uut_ of basys3.v
    // End of automatics
+   
+   // our additions
+   reg [7:0] instArray [0:1024];
+   integer instCount;
+   reg [8*8-1:0] lineBuffer; 
 
    initial
      begin
@@ -27,16 +32,23 @@ module tb;
         #1000 btnR = 0;
         #1500000;
         
-        tskRunPUSH(0,4);
-        tskRunPUSH(0,0);
-        tskRunPUSH(1,3);
-        tskRunMULT(0,1,2);
-        tskRunADD(2,0,3);
-        tskRunSEND(0);
-        tskRunSEND(1);
-        tskRunSEND(2);
-        tskRunSEND(3);
-        
+        // our modifications!
+//        tskRunPUSH(0,4);
+//        tskRunPUSH(0,0);
+//        tskRunPUSH(1,3);
+//        tskRunMULT(0,1,2);
+//        tskRunADD(2,0,3);
+//        tskRunSEND(0);
+//        tskRunSEND(1);
+//        tskRunSEND(2);
+//        tskRunSEND(3);
+
+        // parse instructions line by line
+        $readmemb("seq.code", instArray);
+        instCount = instArray[0];
+        for (i = 1; i <= instCount; i = i + 1)
+          decode(instArray[i]);
+
         #1000;        
         $finish;
      end
@@ -114,6 +126,38 @@ module tb;
          tskRunInst(inst);
       end
    endtask //
+   
+   task decode;
+     input [7:0] inst;
+     reg [1:0] opcode, ra, rb, rc;
+     reg [3:0] imm;
+     begin
+       opcode = inst[7:6];
+       case (opcode)
+         2'b00: begin
+           ra = inst[5:4];
+           imm = inst[3:0];
+           tskRunPUSH(ra, imm);
+         end
+         2'b01: begin
+           ra = inst[5:4];
+           rb = inst[3:2];
+           rc = inst[1:0];
+           tskRunADD(ra, rb, rc);
+         end
+         2'b10: begin
+           ra = inst[5:4];
+           rb = inst[3:2];
+           rc = inst[1:0];
+           tskRunMULT(ra, rb, rc);
+         end
+         2'b11: begin
+           ra = inst[5:4];
+           tskRunSEND(ra);
+         end
+       endcase
+     end
+   endtask
 
    always @ (posedge clk)
      if (uut_.inst_vld)

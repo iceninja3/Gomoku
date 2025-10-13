@@ -20,10 +20,17 @@ module model_uart(/*AUTOARG*/
    event     evTxBit;
    event     evTxByte;
    reg       TX;
+   
+   // our additions!
+   reg [7:0] rxBuffer [0:4];
+   integer rxBufferCount = 0;
+   integer i;
+   reg [8*5-1:0] myString;
 
    initial
      begin
         TX = 1'b1;
+        rxBufferCount = 0;
      end
    
    always @ (negedge RX)
@@ -37,7 +44,20 @@ module model_uart(/*AUTOARG*/
              rxData[7:0] = {RX,rxData[7:1]};
           end
         ->evByte;
-        $display ("%d %s Received byte %02x (%s)", $stime, name, rxData, rxData);
+        // our modifications!
+        // $display ("%d %s Received byte %02x (%s)", $stime, name, rxData, rxData);
+        if (rxData == 8'h72) begin // 'r' because that's what we rx???
+          // $display("foo");
+          myString = "";
+          for (i = 0; i < rxBufferCount; i = i + 1)
+            myString = {myString, rxBuffer[i]};
+          $display ("%d %s Received string %s", $stime, name, myString);
+          rxBufferCount = 0;
+        end
+        else begin
+          rxBuffer[rxBufferCount] = rxData;
+          rxBufferCount = rxBufferCount + 1;
+        end
      end
 
    task tskRxData;
