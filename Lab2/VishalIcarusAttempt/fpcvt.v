@@ -1,13 +1,4 @@
-/**
- * @file FPCVT.v
- * @brief Converts a 12-bit two's complement integer to an 8-bit custom floating-point format.
- * @details The conversion follows the specification from CS M152A Lab 2.
- * The 8-bit floating-point format is composed of:
- * - 1-bit sign (s)
- * - 3-bit exponent (E)
- * - 4-bit significand (F)
- * The value is calculated as V = (-1)^s * F * 2^E.
- */
+
 module FPCVT (
     input  wire [11:0] D, // Input data in 12-bit Two's Complement
     output wire        s, // Sign bit of the FP representation
@@ -15,19 +6,16 @@ module FPCVT (
     output reg  [3:0]  F  // 4-bit Significand of the FP representation
 );
 
-    //================================================================
-    // Stage 1: Convert 2's Complement to Sign-Magnitude
-    //================================================================
-    // The sign bit 's' is the MSB of the input D.
-    // The magnitude is the absolute value of D.
-    // If D is negative, its magnitude is found by taking its two's complement (~D + 1).
+    // Convert 2's Complement to Sign-Magnitude
+    // The sign bit s is the MSB of the input D
+    // The magnitude is the absolute value of D
+    // If D is negative, its magnitude is found by taking its two's complement (~D + 1)
     wire [11:0] magnitude;
     assign s = D[11];
     assign magnitude = s ? (~D + 1'b1) : D;
 
-    //================================================================
-    // Stage 2: Primary Conversion (Priority Encoder)
-    //================================================================
+
+    // rriority encoder
     // This stage determines the preliminary exponent and a 5-bit value
     // containing the 4-bit significand and a 5th "round bit".
     // A priority-encoded case statement finds the most significant '1'
@@ -80,10 +68,9 @@ module FPCVT (
     end
 
 
-    //================================================================
-    // Stage 3: Rounding and Overflow Handling
-    //================================================================
-    // This stage performs the rounding operation and handles all overflow cases.
+ 
+    // Rounding and Overflow Handling
+    // This stage performs the rounding operation and handles all overflow cases
     wire [3:0] pre_round_F;
     wire       round_bit;
     wire [4:0] rounded_F;           // 5 bits to hold potential carry-out

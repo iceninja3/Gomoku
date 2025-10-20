@@ -36,7 +36,7 @@ module fpcvt(
     
     // clearly, sign bit from 2's complement <=> sign bit in fp
     assign s = d[11];
-    // take mag = abs(d[10:0])
+   
     assign mag = s ? (~d[10:0] + 1) : d[10:0];
     
     always @* begin
