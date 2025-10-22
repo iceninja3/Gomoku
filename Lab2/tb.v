@@ -1,6 +1,4 @@
-`timescale 1ns/1ps
-
-module tb_fpcvt;
+module tb;
 
     // DUT inputs and outputs
     reg  [11:0] d;
@@ -10,10 +8,10 @@ module tb_fpcvt;
 
     // Instantiate the DUT
     fpcvt uut (
-        .d(d),
-        .s(s),
-        .e(e),
-        .f(f)
+        .D(d),
+        .S(s),
+        .E(e),
+        .F(f)
     );
 
     // Task to display formatted result
@@ -31,33 +29,24 @@ module tb_fpcvt;
         $display("   Floating-Point Conversion Testbench  ");
         $display("========================================");
 
-        // Zero and small positives
         d = 12'd0;          show_result(d);
         d = 12'd1;          show_result(d);
-        d = 12'd3;          show_result(d);
-        d = 12'd7;          show_result(d);
         d = 12'd15;         show_result(d);
-
-        // Mid-range positives
-        d = 12'd32;         show_result(d);
         d = 12'd63;         show_result(d);
-        d = 12'd128;        show_result(d);
-        d = 12'd255;        show_result(d);
         d = 12'd422;        show_result(d);
         d = 12'd1023;       show_result(d);
-
-        // Maximum positive
+        d = 12'd1500;       show_result(d);
+        d = 12'd2000;       show_result(d);
         d = 12'd2047;       show_result(d);
-
-        // Negatives
+        
         d = -12'd1;         show_result(d);
         d = -12'd15;        show_result(d);
-        d = -12'd32;        show_result(d);
         d = -12'd63;        show_result(d);
         d = -12'd422;       show_result(d);
         d = -12'd1023;      show_result(d);
-        d = -12'd2047;      show_result(d);
-        d = -12'd2048;      show_result(d);  // edge case (most negative)
+        d = -12'd1500;      show_result(d);
+        d = -12'd2000;      show_result(d);
+        d = -12'd2048;      show_result(d);
 
         $display("========================================");
         $finish;
