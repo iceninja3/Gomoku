@@ -25,18 +25,18 @@ module clock(
     output wire clk_1hz,
     output wire clk_2hz,
     output wire clk_500hz,
-    output wire clk_4hz
+    output wire clk_blink
     );
     localparam CLK_FREQ = 100_000_000;
     localparam CNT_1HZ_MAX = (CLK_FREQ / 1) - 1;
     localparam CNT_2HZ_MAX = (CLK_FREQ / 2) - 1;
     localparam CNT_500HZ_MAX = (CLK_FREQ / 500) - 1;
-    localparam CNT_4HZ_MAX = (CLK_FREQ / 4) - 1;
+    localparam CNT_BLINK_MAX = (CLK_FREQ / 4) - 1;
     
     reg [31:0] cnt_1hz = 32'b0;
     reg [31:0] cnt_2hz = 32'b0;
     reg [31:0] cnt_500hz = 32'b0;
-    reg [31:0] cnt_4hz = 32'b0;
+    reg [31:0] cnt_blink = 32'b0;
     
     always @(posedge clk_100mhz) begin
         if (cnt_1hz == CNT_1HZ_MAX) begin
@@ -60,16 +60,16 @@ module clock(
             cnt_500hz <= cnt_500hz + 1;
         end
         
-        if (cnt_4hz == CNT_4HZ_MAX) begin
-            cnt_4hz <= 0;
+        if (cnt_blink == CNT_BLINK_MAX) begin
+            cnt_blink <= 0;
         end
         else begin
-            cnt_4hz <= cnt_4hz + 1;
+            cnt_blink <= cnt_blink + 1;
         end
     end
     
     assign clk_1hz = (cnt_1hz == CNT_1HZ_MAX);
     assign clk_2hz = (cnt_2hz == CNT_2HZ_MAX);
     assign clk_500hz = (cnt_500hz == CNT_500HZ_MAX);
-    assign clk_4hz = (cnt_4hz == CNT_4HZ_MAX);
+    assign clk_blink = (cnt_blink == CNT_BLINK_MAX);
 endmodule
