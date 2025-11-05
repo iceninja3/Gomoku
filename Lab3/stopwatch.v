@@ -43,13 +43,16 @@ module stopwatch(
     localparam S_ADJUST_COUNTING = 2'b11;
     
     reg [1:0] state;
-    
+    reg pause_d;
     reg [3:0] sec_ones;
     reg [3:0] sec_tens;
     reg [3:0] min_ones;
     reg [3:0] min_tens;
     
+    wire pause_pressed = button_pause & ~pause_d;
+    
     always @(posedge clk_100mhz) begin
+        pause_d <= button_pause;
         if (rst) begin
             state <= S_COUNTING;
             sec_ones <= 4'd0;
@@ -60,7 +63,7 @@ module stopwatch(
         else begin
             case (state)
                 S_PAUSED: begin
-                    if (button_pause) begin
+                    if (pause_pressed) begin
                         state <= S_COUNTING;
                     end
                     else if (switch_adj) begin
@@ -69,7 +72,7 @@ module stopwatch(
                 end
                 
                 S_COUNTING: begin
-                    if (button_pause) begin
+                    if (pause_pressed) begin
                         state <= S_PAUSED;
                     end
                     else if (switch_adj) begin
