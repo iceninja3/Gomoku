@@ -6,7 +6,7 @@ module tb_display;
     reg clk_100mhz;
     reg rst;
     reg clk_500hz;
-    reg clk_4hz;
+    reg clk_blink;
 
     // BCD inputs
     reg [3:0] bcd_min_tens;
@@ -26,7 +26,7 @@ module tb_display;
         .clk_100mhz(clk_100mhz),
         .rst(rst),
         .clk_500hz(clk_500hz),
-        .clk_4hz(clk_4hz),
+        .clk_blink(clk_blink),
         .bcd_min_tens(bcd_min_tens),
         .bcd_min_ones(bcd_min_ones),
         .bcd_sec_tens(bcd_sec_tens),
@@ -43,8 +43,8 @@ module tb_display;
     initial clk_500hz = 0;
     always #1000 clk_500hz = ~clk_500hz; // 1 kHz period for simulation
 
-    initial clk_4hz = 0;
-    always #125000 clk_4hz = ~clk_4hz; // 250 us period for simulation
+    initial clk_blink = 0;
+    always #125000 clk_blink = ~clk_blink; // 250 us period for simulation
 
     // Test stimulus
     initial begin

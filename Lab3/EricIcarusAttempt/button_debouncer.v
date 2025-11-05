@@ -43,22 +43,27 @@ module button_debouncer (
     end
 
     // Debounce Logic using step_d from basys3.v
+    reg [1:0] sync;
     reg [2:0] step_d = 3'b000;
     reg       btn_debounced = 1'b0;
 
-    always @ (posedge clk_100mhz) begin
+    always @(posedge clk_100mhz) begin
         if (rst) begin
+            sync <= 2'b00;
             step_d <= 3'b000;
             btn_debounced <= 1'b0;
         end
-        // Only sample the button on the slow clock enable
-        else if (clk_en) begin
-            step_d <= {btn_in, step_d[2:1]};
-            if (step_d == 3'b110) begin
-                btn_debounced <= 1'b1;
-            end
-            else if (step_d == 3'b001) begin
-                btn_debounced <= 1'b0;
+        else begin
+            // Synchronize asynchronous button input
+            sync <= {sync[0], btn_in};
+
+            // Only sample the synchronized input on the slow clock enable
+            if (clk_en) begin
+                step_d <= {sync[1], step_d[2:1]};
+                if (step_d == 3'b110)
+                    btn_debounced <= 1'b1;
+                else if (step_d == 3'b001)
+                    btn_debounced <= 1'b0;
             end
         end
     end

@@ -23,7 +23,7 @@ module display(
     input wire clk_100mhz,
     input wire rst,
     input wire clk_500hz, // Mux switching clock enable (faster)
-    input wire clk_4hz,   // Blinking clock enable (>1Hz)
+    input wire clk_blink,   // Blinking clock enable (>1Hz)
     input wire [3:0] bcd_min_tens,
     input wire [3:0] bcd_min_ones,
     input wire [3:0] bcd_sec_tens,
@@ -52,16 +52,16 @@ module display(
     end
 
     reg blink_on;
-    reg clk_4hz_d; // delayed sample for rising-edge detect
+    reg clk_blink_d; // delayed sample for rising-edge detect
     always @(posedge clk_100mhz) begin
         if (rst) begin
             blink_on <= 1'b1; // Start ON
-            clk_4hz_d <= 1'b0;
+            clk_blink_d <= 1'b0;
         end
         else begin
             // Rising-edge detect on the enable signal allows either pulse or level inputs
-            clk_4hz_d <= clk_4hz;
-            if (clk_4hz && !clk_4hz_d) begin
+            clk_blink_d <= clk_blink;
+            if (clk_blink && !clk_blink_d) begin
                 blink_on <= !blink_on;
             end
         end

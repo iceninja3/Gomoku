@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Module Name: stopwatch_top
+// Module Name: main
 // Description: Top-level module for the M152A Lab 3 Stopwatch.
 //              Instantiates and connects all sub-modules:
 //              - clock (clock divider)
@@ -13,14 +13,13 @@
 module main(
     // --- Global Inputs ---
     input wire clk,         // 100MHz system clock
-    input wire btnC,        // Center button (used for Reset)
-    input wire btnU,        // Up button (used for Pause/Continue)
+    input wire btnC,        // Center button (used for Reset, Active-LOW)
+    input wire btnU,        // Up button (used for Pause/Continue, Active-LOW)
     input wire [1:0] sw,    // Switches (sw[0]=Adjust, sw[1]=Select)
 
     // --- Global Outputs ---
     output wire [6:0] segment, // 7-segment display segments (Active-LOW)
     output wire [3:0] anode,   // 7-segment display anodes (Active-LOW)
-    output wire [0:0] led,     // LED[0] for debug (shows debounced pause)
 
     // --- Debug/Monitor Outputs for Testbench ---
     output wire [3:0] bcd_min_tens_out,
@@ -39,7 +38,7 @@ module main(
     // Clock enable pulses
     wire clk_1hz;
     wire clk_2hz;
-    wire clk_4hz;
+    wire clk_blink;
     wire clk_500hz;
 
     // Debounced button and switch signals (level)
@@ -65,35 +64,27 @@ module main(
         .clk_1hz(clk_1hz),
         .clk_2hz(clk_2hz),
         .clk_500hz(clk_500hz),
-        .clk_4hz(clk_4hz)
+        .clk_blink(clk_blink)
     );
 
     // --- 2. Input Conditioning (Debouncers and Synchronizers) ---
-`ifdef SIMULATION
-    // In simulation, bypass slow debouncers to recognize short testbench pulses
-    assign rst = btnC;
-    assign btn_pause_level = btnU;
-    assign sw_adj_level = sw[0];
-    assign sw_sel_level = sw[1];
-`else
-    // Debounce the Reset button (btnC)
+    // Debounce the Reset button (btnC). Invert the input from Active-LOW to Active-HIGH.
     button_debouncer i_rst_debouncer (
         .clk_100mhz(clk),
         .rst(1'b0), // Debouncer's own reset is tied low
-        .btn_in(btnC),
+        .btn_in(~btnC), // <<-- FIX: Invert btnC
         .btn_out(rst) // This is the clean, high-active synchronous reset
     );
 
-    // Debounce the Pause button (btnU)
+    // Debounce the Pause button (btnU). Invert the input from Active-LOW to Active-HIGH.
     button_debouncer i_pause_debouncer (
         .clk_100mhz(clk),
         .rst(rst),
-        .btn_in(btnU),
+        .btn_in(~btnU), // <<-- FIX: Invert btnU
         .btn_out(btn_pause_level)
     );
 
     // Synchronize the Adjust switch (sw[0])
-    // (Using 'switch_debouncer' which is a 2-FF synchronizer)
     switch_debouncer i_adj_sync (
         .clk_100mhz(clk),
         .rst(rst),
@@ -108,7 +99,6 @@ module main(
         .sw_in(sw[1]),
         .sw_out(sw_sel_level)
     );
-`endif
 
     // --- 3. Stopwatch Core Logic ---
     // Main state machine.
@@ -136,7 +126,7 @@ module main(
         .clk_100mhz(clk),
         .rst(rst),
         .clk_500hz(clk_500hz),
-        .clk_4hz(clk_4hz),
+        .clk_blink(clk_blink),
         .bcd_min_tens(bcd_min_tens),
         .bcd_min_ones(bcd_min_ones),
         .bcd_sec_tens(bcd_sec_tens),
@@ -147,10 +137,6 @@ module main(
         .segment(segment),
         .anode(anode)
     );
-
-    // --- 5. Debug Output ---
-    // Assign the debounced pause signal to LED[0]
-    assign led[0] = btn_pause_level;
 
     // Drive testbench monitor outputs
     assign bcd_min_tens_out = bcd_min_tens;
