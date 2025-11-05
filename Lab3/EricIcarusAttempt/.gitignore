@@ -1,0 +1,16 @@
+# Build and simulation outputs
+/build/
+*.out
+*.vcd
+*.lxt
+*.fst
+*.log
+
+# Editor backups and temp files
+*~
+*.swp
+*.bak
+
+# OS cruft
+.DS_Store
+Thumbs.db
