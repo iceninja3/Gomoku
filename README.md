@@ -1,7 +1,7 @@
 # Gomoku
 This game is complete!
 
-[Youtube Link]([url](https://youtube.com/shorts/ofCnEJebs1c?feature=share))
+Youtube Link: https://youtube.com/shorts/ofCnEJebs1c?feature=share
 
 Features:
 * Players can select an avatar to play with
